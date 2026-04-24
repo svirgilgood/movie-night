@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "movie-night"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "svirgilgood", email = "svirgilgoodwin@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "fastapi[standard]==0.128.6",
+  "Jinja2==3.1.6",
+  "pyoxigraph==0.5.5",
+  "pyjwt==2.11.0",
+  "pwdlib[argon2]==0.3.0",
+  "dotenv==0.9.9",
+]
+
+[project.urls]
+Documentation = "https://github.com/svirgilgood/movie-night#readme"
+Issues = "https://github.com/svirgilgood/movie-night/issues"
+Source = "https://github.com/svirgilgood/movie-night"
+
+[tool.hatch.version]
+path = "src/movie_night/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/movie_night tests}"
+
+[tool.coverage.run]
+source_pkgs = ["movie_night", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/movie_night/__about__.py",
+]
+
+[tool.coverage.paths]
+movie_night = ["src/movie_night", "*/movie-night/src/movie_night"]
+tests = ["tests", "*/movie-night/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
