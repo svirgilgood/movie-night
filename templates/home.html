@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home</title>
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+  </head>
+  <body>
+
+    <h1 class="center">Home</h1>
+    <div style="justify-content:center;align-items:center;display:grid; padding:10px;">
+      {% for row in members %}
+      <div class="member-box" id={{ row["member"] }} style="border:1px solid grey;padding:10px;border-radius:5%;">
+        <p>{{ row["name"] }}</p>
+        <p>{{ row["date"] }}</p>
+      </div>
+      {% endfor %}
+
+      <button type="button" id="add-member-button" onclick="toggleActive(this.nextElementSibling)" class="collapsible">Add Member</button>
+      <div class="content" id="add-id-input">
+        <input aria-label="Name"  type="text" name="name" id="name-entry" size=30 />
+        <button onclick="addFamilyMember()">Submit</button>
+      </div>
+    </div>
+
+  </body>
+  <script>
+    function toggleActive(content) {
+      /*this.toggle("active");*/
+      console.log(content);
+      if (content.style.display === "block") {
+        content.style.display = "none";
+      } else {
+        content.style.display = "block";
+      }
+    }
+    function addFamilyMember() {
+      let name = document.getElementById("name-entry").value;
+      console.log(name);
+      fetch("/update/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({"function": "add_family_member", data: { name } })
+      }).then(response => response.json())
+        .then(data => {
+          let nameField = document.getElementById("name-entry");
+          nameField.value = "";
+        })
+    }
+
+  </script>
+</html>

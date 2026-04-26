@@ -1,0 +1,42 @@
+.movie-night-header {
+  /* background-image: url("./static/theater3.jpg"); */
+  /* <a href="https://www.vecteezy.com/free-vector/movie-theater">Movie Theater Vectors by Vecteezy</a> */
+}
+
+.home {
+  /*background-image: url('/static/theater3.jpg');*/
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+.center {
+  display: flex;
+  margin-top: 120px;
+  justify-content: center;
+  align-items: center;
+  text-align: justify;
+}
+
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add Member</title>
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+  </head>
+  <body>
+    <body>
+      <div class="center">
+        <h1>Add Member</h1>
+      </div>
+      <div class="center">
+        <form method="POST" action="/add-member">
+          <input aria-label="Enter Family Member" class="form-control" type="text" id="username" size=30 />
+          <input class="btn btn-search btn-default" id="field-search-button" type="submit" value="Submit" />
+
+        </form>
+      </div>
+    </body>
+  </body>
+</html>
