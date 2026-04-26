@@ -8,4 +8,9 @@ choose a person to pick the next movie
 3. Enter the virtual environment `source ./movie-night/bin/activate`
 4. Then  install dependencies `pip install -e .`
 
+## Running the Development Environment
+
+To run the development environment run `fastapi dev src/movie_night/app.py` from the
+root directory of the project.
+
 
