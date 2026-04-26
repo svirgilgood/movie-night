@@ -73,7 +73,7 @@ def serve_root(
     return templates.TemplateResponse(request=request, name="index.html") #context={"data:data"})
 
 @app.post("/update/")
-def process_update(update_data: UpdateData):
+def process_update(update_data: UpdateData, user=Depends(manager)):
     print(update_data)
 
 @app.exception_handler(NotAuthenticatedException)
