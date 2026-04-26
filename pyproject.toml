@@ -31,6 +31,7 @@ dependencies = [
   "pyjwt==2.11.0",
   "pwdlib[argon2]==0.3.0",
   "dotenv==0.9.9",
+  "fastapi-login==1.10.3",
 ]
 
 [project.urls]
