@@ -18,7 +18,8 @@ from fastapi_login.exceptions import InvalidCredentialsException
 from .triplestore import (
     create_database,
     get_user,
-    get_members
+    get_members,
+    add_family_member
 )
 
 from .authenticator import (
@@ -75,6 +76,15 @@ def serve_root(
 @app.post("/update/")
 def process_update(update_data: UpdateData, user=Depends(manager)):
     print(update_data)
+    print(user)
+    match update_data.function:
+        case "add_family_member":
+            add_family_member(user["user_node"], update_data.data["name"])
+            return "Successful"
+        case _:
+            return "Not Successful"
+
+
 
 @app.exception_handler(NotAuthenticatedException)
 def auth_exception_handler(request: Request, exc: NotAuthenticatedException):

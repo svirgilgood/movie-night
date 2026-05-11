@@ -1,6 +1,5 @@
 from typing import Annotated
 from datetime import timedelta, datetime, timezone
-import hashlib
 
 from dotenv import load_dotenv, dotenv_values
 from fastapi.security import (
@@ -19,7 +18,8 @@ from pydantic import BaseModel
 
 from pyoxigraph import Store, Quad, Literal, QuerySolutions, BlankNode
 
-from .triplestore import ns, get_user
+from .triplestore import get_user
+from .utils import ns, create_node
 
 
 load_dotenv()
@@ -71,7 +71,6 @@ def add_authentication(store: Store):
     .
     ```
     """
-    m = hashlib.sha256()
     user_graph = ns.mno.term("UserGraph")
     store.clear_graph(user_graph)
     username = os.getenv("SYSTEM_USER_NAME")
@@ -79,8 +78,7 @@ def add_authentication(store: Store):
     email = os.getenv("SYSTEM_USER_EMAIL")
     pswd = os.getenv("SYSTEM_USER_PASSWORD")
 
-    m.update(username.encode("utf-8"))
-    user_node = ns.mno.term("data/_User_" + m.hexdigest())
+    user_node = create_node(username)
 
     store.add(Quad(user_node, ns.rdf.type, ns.mno.User, user_graph))
     store.add(Quad(user_node, ns.mno.userName, Literal(username), user_graph))

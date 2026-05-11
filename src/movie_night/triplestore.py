@@ -15,6 +15,7 @@ from pyoxigraph import (
 from dotenv import load_dotenv, dotenv_values
 import os
 from pathlib import Path
+from .utils import ns, create_node
 
 from typing import Dict
 
@@ -24,41 +25,6 @@ DATA_DIR = Path(os.getenv("DATA_DIR") or ".")
 DB = DATA_DIR / "project.db"
 store: Store = Store()
 
-
-class Namespace(str):
-    def __new__(cls, value: str):
-        return str.__new__(cls, value)
-
-    def term(self, local: str) -> NamedNode:
-        return NamedNode(self + local)
-
-    def __getattr__(self, local: str) -> NamedNode:
-        if local.startswith("__"):
-            raise AttributeError
-        return self.term(local)
-
-
-class NS:
-    def __init__(self, prefixes: Dict[str, str]):
-        self.dict = prefixes
-
-    def get(self, namespace):
-        return Namespace(self.dict[namespace])
-
-    def __getattr__(self, namespace):
-        return self.get(namespace)
-
-PREFIXES = {
-    "mno": "https://ontology.movie-night.site/",
-    "dc": "http://purl.org/dc/elements/1.1/",
-    "dcterms": "http://purl.org/dc/terms/",
-    "xsd": "http://www.w3.org/2001/XMLSchema#",
-    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-}
-
-
-ns = NS(PREFIXES)
 
 def create_database():
     """
@@ -124,6 +90,7 @@ def get_members(user_node: str):
     FROM %s
     WHERE {
         ?member
+            a mno:Person ;
             mno:fullName ?name ;
             mno:choice [
                 mno:onDate ?date ;
@@ -134,7 +101,7 @@ def get_members(user_node: str):
     ORDER BY ?lastDate
 
     """ % (NamedNode(user_node))
-    print(query)
+    #print(query)
     results = store.query(query)
     return [
         {
@@ -144,3 +111,24 @@ def get_members(user_node: str):
         }
         for res in results
     ]
+
+def add_family_member(user_node: str, new_family_member: str):
+    """
+    """
+    new_node = create_node(new_family_member)
+    query = """PREFIX mno:  <https://ontology.movie-night.site/>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    INSERT DATA {
+        GRAPH %s {
+            %s
+                mno:fullName %s ;
+                mno:choice [
+                    mno:onDate "00-00-00T00:00:00.0000Z"^^xsd:dateTime ;
+                ] ;
+        }
+    }
+   """ % (NamedNode(user_node), new_node, Literal(new_family_member))
+
+    store.update(query)
+
