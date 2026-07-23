@@ -19,7 +19,8 @@ from .triplestore import (
     create_database,
     get_user,
     get_members,
-    add_family_member
+    add_family_member,
+    add_movie,
 )
 
 from .authenticator import (
@@ -33,6 +34,8 @@ from .authenticator import (
     SECRET_KEY,
     verify_password,
 )
+
+from .utils import auto_complete
 
 class NotAuthenticatedException(Exception):
     pass
@@ -55,6 +58,9 @@ class MemberData(BaseModel):
 class UpdateData(BaseModel):
     function: str
     data: Dict
+
+class MovieRequest(BaseModel):
+    title: str
 
 @manager.user_loader()
 def query_user(user_id: str):
@@ -81,6 +87,15 @@ def process_update(update_data: UpdateData, user=Depends(manager)):
         case "add_family_member":
             add_family_member(user["user_node"], update_data.data["name"])
             return "Successful"
+        case "add_movie":
+            add_movie(
+                user["user_node"],
+                update_data.data["member"],
+                update_data.data["movie-id"],
+                update_data.data["movie-name"],
+                update_data.data["date"],
+                poster_url=update_data.data["poster-id"]
+            )
         case _:
             return "Not Successful"
 
@@ -128,4 +143,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     #return {"access_token": access_token}
 
 
+@app.post("/mdb")
+async def search_mdb(request: MovieRequest, user=Depends(manager)):
+    response = await auto_complete(request.title)
+    #print(response)
+    return response
 

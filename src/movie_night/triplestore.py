@@ -90,7 +90,7 @@ def get_members(user_node: str):
     FROM %s
     WHERE {
         ?member
-            a mno:Person ;
+            a mno:FamilyMember ;
             mno:fullName ?name ;
             mno:choice [
                 mno:onDate ?date ;
@@ -112,6 +112,7 @@ def get_members(user_node: str):
         for res in results
     ]
 
+
 def add_family_member(user_node: str, new_family_member: str):
     """
     """
@@ -122,6 +123,7 @@ def add_family_member(user_node: str, new_family_member: str):
     INSERT DATA {
         GRAPH %s {
             %s
+                a mno:FamilyMember ;
                 mno:fullName %s ;
                 mno:choice [
                     mno:onDate "00-00-00T00:00:00.0000Z"^^xsd:dateTime ;
@@ -132,3 +134,42 @@ def add_family_member(user_node: str, new_family_member: str):
 
     store.update(query)
 
+def add_movie(user_node: str, family_member_node: str, movie_id: str, movie_name: str, date: str, poster_url=""):
+    """
+    """
+    movie_node = NamedNode(f"https://www.imdb.com/title/{movie_id}")
+    #movie_node = create_node(movie_id, data_class="Movie")
+    movie_query = """PREFIX mno:  <https://ontology.movie-night.site/>
+    INSERT DATA {
+        GRAPH mno:MovieGraph {
+            %s
+                a mno:Movie ;
+                mno:title %s ;
+    """ % (movie_node, Literal(movie_name))
+    if poster_url != "N/A" and poster_url != "":
+        movie_query = movie_query + """
+                mno:poster %s ;
+        """ % (Literal(poster_url, datatype=ns.xsd.anyURI))
+
+    movie_query = movie_query + """
+        .
+        }
+    }
+    """
+    #print("movie query", movie_query)
+    store.update(movie_query)
+
+    query = """PREFIX mno:  <https://ontology.movie-night.site/>
+
+    INSERT DATA {
+        GRAPH %s {
+            %s
+                mno:choice [
+                    mno:onDate %s ;
+                    mno:selection %s ;
+                ] ;
+            .
+        }
+    }
+    """ %(NamedNode(user_node), NamedNode(family_member_node), Literal(date, datatype=ns.xsd.date), movie_node )
+    store.update(query)
