@@ -11,15 +11,23 @@
     <h1 class="center">Home</h1>
     <div style="justify-content:center;align-items:center;display:grid; padding:10px;">
       {% for row in members %}
-      <div class="member-box" onclick="" id={{ row["member"] }} style="border:1px solid grey;padding:10px;border-radius:5%;">
+      <div class="member-box" onclick="" id="{{ row['member'] }}" style="border:1px solid grey;padding:10px;border-radius:5%;">
         <p>{{ row["name"] }}</p>
         <p>{{ row["date"] }}</p>
         <div class="modal">
-          <div class="modal-content">
+          <div class="box-content" memberid="{{ row['member'] }}" onclick="createMovieModel(memberid)" >
             <!--  Last Movie Chosen (image?), date, new movie choice  -->
-              <input aria-label="Movie IMDB Identity" list="{{ row['member'] + 'movie-id' + 'list'}}" onkeypress="autoComplete(id)" type="text" name="movie" id="{{ row['member'] + 'movie-id'}}" size=30 />
+              <input aria-label="Movie IMDB Identity" list="{{ row['member'] + 'movie-id' + 'list'}}" onkeyup="autoComplete(id)" type="text" name="movie" id="{{ row['member'] + 'movie-id'}}" size=30 />
               <input aria-label="Chose date type" type="date" name="date" id="{{row['member'] + 'date-input-id'}}" size=30 />
               <button name="{{ row['member']}}" onclick="addMovieChoice(name)">Submit</button>
+          </div>
+          <div class="modal-content" id="{{ row['member'] + '-model' }}">
+            {% for choice in row["movies"] %}
+              <div class="movie-choice">
+                <span class="movie-title">{{ choice["movie_title"] }} </span>
+                <span class="choice-date">{{ choice["date"] }} </span>
+              </div>
+            {% endfor %}
           </div>
         </div>
       </div>
@@ -34,6 +42,17 @@
 
   </body>
   <script>
+    function createMovieModel(memberid) {
+      const movieModal = document.createElement("div");
+      movieModal.setAttribute("class", "modal-content");
+      fetch("/", {
+
+      }).then(response => response.json())
+        .then(r => {
+
+        })
+
+    }
     function addMovieChoice(name) {
       const movieImdbId = document.getElementById(name + "movie-id");
       const movieChoices = document.getElementById(name + "movie-idlist");
@@ -78,7 +97,6 @@
               acList.appendChild(movieOption);
             }
             titleEle.appendChild(acList);
-
           }
         })
     }
@@ -94,7 +112,7 @@
     function addFamilyMember() {
       let name = document.getElementById("name-entry").value;
       console.log(name);
-      fetch("/update/", {
+      fetch("/update", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({"function": "add_family_member", data: { name } })

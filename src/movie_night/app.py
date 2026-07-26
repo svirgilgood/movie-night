@@ -100,6 +100,11 @@ def process_update(update_data: UpdateData, user=Depends(manager)):
             return "Not Successful"
 
 
+@app.post("/movies")
+def find_movies(movie_data: MovieData, user=Depends(manager)):
+    """ """
+    return
+
 
 @app.exception_handler(NotAuthenticatedException)
 def auth_exception_handler(request: Request, exc: NotAuthenticatedException):
