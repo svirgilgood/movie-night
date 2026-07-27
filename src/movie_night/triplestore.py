@@ -173,3 +173,28 @@ def add_movie(user_node: str, family_member_node: str, movie_id: str, movie_name
     }
     """ %(NamedNode(user_node), NamedNode(family_member_node), Literal(date, datatype=ns.xsd.date), movie_node )
     store.update(query)
+
+def find_movies(user_node: str, member_node: str):
+    """
+    """
+    query = """PREFIX mno:  <https://ontology.movie-night.site/>
+    SELECT ?movieTitle ?posterUrl ?date
+    FROM mno:MovieGraph
+    FROM %s
+    WHERE {
+        %s
+            mno:choice [
+                mno:onDate ?date ;
+                mno:selection ?movieNode ;
+            ] ;
+        .
+        ?movieNode
+            mno:title ?movieTitle ;
+            mno:poster ?posterUrl ;
+        .
+    }
+    """ % (NamedNode(user_node), NamedNode(member_node))
+
+    return [{"movieTitle": res.movieTitle, "posterUrl": res.posterUrl, "date": res.date } for res in store.query(query) ]
+
+
