@@ -178,7 +178,7 @@ def find_movies(user_node: str, member_node: str):
     """
     """
     query = """PREFIX mno:  <https://ontology.movie-night.site/>
-    SELECT ?movieTitle ?posterUrl ?date
+    SELECT ?movie_title ?poster_url ?date
     FROM mno:MovieGraph
     FROM %s
     WHERE {
@@ -189,12 +189,13 @@ def find_movies(user_node: str, member_node: str):
             ] ;
         .
         ?movieNode
-            mno:title ?movieTitle ;
-            mno:poster ?posterUrl ;
+            mno:title ?movie_title ;
+            mno:poster ?poster_url ;
         .
     }
     """ % (NamedNode(user_node), NamedNode(member_node))
 
-    return [{"movieTitle": res.movieTitle, "posterUrl": res.posterUrl, "date": res.date } for res in store.query(query) ]
+    choices = [{"movieTitle": str(movie_title), "posterUrl": poster_url.value, "date": date.value } for movie_title, poster_url, date in store.query(query) ]
+    return choices
 
 
