@@ -21,6 +21,7 @@ from .triplestore import (
     get_members,
     add_family_member,
     add_movie,
+    find_movies,
 )
 
 from .authenticator import (
@@ -62,6 +63,9 @@ class UpdateData(BaseModel):
 class MovieRequest(BaseModel):
     title: str
 
+class MovieData(BaseModel):
+    member: str
+
 @manager.user_loader()
 def query_user(user_id: str):
     user = get_user(user_id)
@@ -101,9 +105,9 @@ def process_update(update_data: UpdateData, user=Depends(manager)):
 
 
 @app.post("/movies")
-def find_movies(movie_data: MovieData, user=Depends(manager)):
+def movie_endpoint(movie_data: MovieData, user=Depends(manager)):
     """ """
-    return
+    return find_movies(user["user_node"], movie_data.member)
 
 
 @app.exception_handler(NotAuthenticatedException)
