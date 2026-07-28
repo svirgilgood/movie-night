@@ -5,13 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Home</title>
     <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+    <style>
+      img {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        width: 150px;
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+      }
+    </style>
   </head>
   <body>
 
     <h1 class="center">Home</h1>
     <div style="justify-content:center;align-items:center;display:grid; padding:10px;">
       {% for row in members %}
-      <div class="member-box" onclick="" id="{{ row['member'] }}" style="border:1px solid grey;padding:10px;border-radius:5%;">
+      <div class="member-box" onclick="createMovieModal(id)" id="{{ row['member'] }}" style="border:1px solid grey;padding:10px;border-radius:5%;">
         <p>{{ row["name"] }}</p>
         <p>{{ row["date"] }}</p>
         <div class="modal">
@@ -21,7 +36,7 @@
               <input aria-label="Chose date type" type="date" name="date" id="{{row['member'] + 'date-input-id'}}" size=30 />
               <button name="{{ row['member']}}" onclick="addMovieChoice(name)">Submit</button>
           </div>
-          <div class="modal-content" id="{{ row['member'] + '-model' }}">
+          <div class="modal-content" id="{{ row['member'] + '-modal' }}">
             {% for choice in row["movies"] %}
               <div class="movie-choice">
                 <span class="movie-title">{{ choice["movie_title"] }} </span>
@@ -42,16 +57,36 @@
 
   </body>
   <script>
-    function createMovieModel(memberid) {
-      const movieModal = document.createElement("div");
-      movieModal.setAttribute("class", "modal-content");
-      fetch("/", {
-
+    function createMovieModal(memberid) {
+      const movieModal = document.getElementById(memberid + "-modal");
+      console.log("memberid", memberid);
+      fetch("/movies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({"member": memberid})
       }).then(response => response.json())
         .then(r => {
+          for (const choice of r) {
+            const choiceDiv = document.createElement("div");
+            choiceDiv.setAttribute("class", "movie-choice");
+            const thumbnail = document.createElement("img");
+            thumbnail.setAttribute("src", choice.posterUrl);
+            thumbnail.setAttribute("alt", choice.movieTitle);
+            thumbnail.setAttribute("class", "thumbnail");
+            choiceDiv.appendChild(thumbnail);
+            const titleEle = document.createElement("span");
+            titleEle.innerHTML = choice.movieTitle;
+            titleEle.setAttribute("class", "movie-title-modal");
+            choiceDiv.appendChild(titleEle);
+            const dateEle  = document.createElement("span");
+            dateEle.innerHTML = choice.date;
+            dateEle.setAttribute("class", "choice-date-modal");
+            choiceDiv.appendChild(dateEle);
+            movieModal.appendChild(choiceDiv);
+          }
+          movieModal.style.display = "block";
 
         })
-
     }
     function addMovieChoice(name) {
       const movieImdbId = document.getElementById(name + "movie-id");
