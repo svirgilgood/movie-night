@@ -12,12 +12,48 @@
         padding: 5px;
         width: 150px;
       }
+      /* The Modal (background) */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
       .modal-content {
+        display: grid;
+        /* Work on grid style */
+        grid-template-areas:
+          "thumbnail"
+          "column";
+        position: relative;
         background-color: #fefefe;
         margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
+        padding: 0px;
         border: 1px solid #888;
         width: 80%; /* Could be more or less, depending on screen size */
+      }
+      /* The Close Button */
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .movie-choice {
+        position: relative
       }
     </style>
   </head>
@@ -29,20 +65,22 @@
       <div class="member-box" onclick="createMovieModal(id)" id="{{ row['member'] }}" style="border:1px solid grey;padding:10px;border-radius:5%;">
         <p>{{ row["name"] }}</p>
         <p>{{ row["date"] }}</p>
-        <div class="modal">
+        <div class="member-box">
           <div class="box-content" memberid="{{ row['member'] }}" onclick="createMovieModel(memberid)" >
             <!--  Last Movie Chosen (image?), date, new movie choice  -->
               <input aria-label="Movie IMDB Identity" list="{{ row['member'] + 'movie-id' + 'list'}}" onkeyup="autoComplete(id)" type="text" name="movie" id="{{ row['member'] + 'movie-id'}}" size=30 />
               <input aria-label="Chose date type" type="date" name="date" id="{{row['member'] + 'date-input-id'}}" size=30 />
               <button name="{{ row['member']}}" onclick="addMovieChoice(name)">Submit</button>
           </div>
-          <div class="modal-content" id="{{ row['member'] + '-modal' }}">
-            {% for choice in row["movies"] %}
-              <div class="movie-choice">
-                <span class="movie-title">{{ choice["movie_title"] }} </span>
-                <span class="choice-date">{{ choice["date"] }} </span>
-              </div>
-            {% endfor %}
+          <div class="modal" id="{{ row['member'] + '-modal'}}">
+            <div class="modal-content" id="{{ row['member'] + '-modal-content' }}">
+              {% for choice in row["movies"] %}
+                <div class="movie-choice">
+                  <span class="movie-title">{{ choice["movie_title"] }} </span>
+                  <span class="choice-date">{{ choice["date"] }} </span>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
       </div>
@@ -58,12 +96,16 @@
   </body>
   <script>
     function createMovieModal(memberid) {
-      const movieModal = document.getElementById(memberid + "-modal");
-      console.log("memberid", memberid);
-      fetch("/movies", {
+      console.log(memberid);
+      const member = memberid.endsWith("-modal") ? memberid.replace("-modal", "") : memberid;
+      const movieModal = document.getElementById(member + "-modal");
+      //console.log("memberid", memberid);
+      const modalContent = document.getElementById(member + "-modal-content");
+      // Add Header to modal with Users name
+      fetch("/movie-choices", {
         method: "POST",
         headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({"member": memberid})
+        body: JSON.stringify({"member": member}),
       }).then(response => response.json())
         .then(r => {
           for (const choice of r) {
@@ -82,10 +124,14 @@
             dateEle.innerHTML = choice.date;
             dateEle.setAttribute("class", "choice-date-modal");
             choiceDiv.appendChild(dateEle);
-            movieModal.appendChild(choiceDiv);
+            modalContent.appendChild(choiceDiv);
           }
           movieModal.style.display = "block";
-
+          window.onclick = function(event) {
+            if (event.target === movieModal) {
+              movieModal.display = "none";
+            }
+          }
         })
     }
     function addMovieChoice(name) {
