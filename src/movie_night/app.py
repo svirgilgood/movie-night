@@ -104,10 +104,13 @@ def process_update(update_data: UpdateData, user=Depends(manager)):
             return "Not Successful"
 
 
-@app.post("/movies")
+@app.post("/movie-choices")
 def movie_endpoint(movie_data: MovieData, user=Depends(manager)):
     """ """
-    return find_movies(user["user_node"], movie_data.member)
+    print("movie_data", movie_data)
+    res = find_movies(user["user_node"], movie_data.member)
+    print("movie lists", res)
+    return res
 
 
 @app.exception_handler(NotAuthenticatedException)
