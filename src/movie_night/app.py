@@ -36,7 +36,7 @@ from .authenticator import (
     verify_password,
 )
 
-from .utils import auto_complete
+from .utils import auto_complete, ns
 
 class NotAuthenticatedException(Exception):
     pass
@@ -118,9 +118,12 @@ def auth_exception_handler(request: Request, exc: NotAuthenticatedException):
     return RedirectResponse(url="/login")
 
 
-@app.get("/movies")
-async def show_past_movies(request: Request, user=Depends(manager)):
-    return templates.TemplateResponse(request, name="movies.html")
+@app.get("/movies/{member_id}")
+async def show_past_movies(request: Request, member_id: str, user=Depends(manager)):
+    member_iri = ns.mno.term(f"data/_User_{member_id}")
+    movie_choices = find_movies(user["user_node"], member_iri)
+    print(movie_choices)
+    return templates.TemplateResponse(request, name="movies.html", context={"choices": movie_choices})
 
 @app.get("/home")
 async def show_home(request: Request, user=Depends(manager)):

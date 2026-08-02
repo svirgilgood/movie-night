@@ -62,11 +62,11 @@
     <h1 class="center">Home</h1>
     <div style="justify-content:center;align-items:center;display:grid; padding:10px;">
       {% for row in members %}
-      <div class="member-box" onclick="createMovieModal(id)" id="{{ row['member'] }}" style="border:1px solid grey;padding:10px;border-radius:5%;">
+      <div class="member-box" id="{{ row['mid'] }}" onclick="myhref(id)" id="{{ row['member'] }}" style="border:1px solid grey;padding:10px;border-radius:5%;">
         <p>{{ row["name"] }}</p>
         <p>{{ row["date"] }}</p>
         <div class="member-box">
-          <div class="box-content" memberid="{{ row['member'] }}" onclick="createMovieModel(memberid)" >
+          <div class="box-content" memberid="{{ row['member'] }}"  href="/movies/{{ row['member'] }}" >
             <!--  Last Movie Chosen (image?), date, new movie choice  -->
               <input aria-label="Movie IMDB Identity" list="{{ row['member'] + 'movie-id' + 'list'}}" onkeyup="autoComplete(id)" type="text" name="movie" id="{{ row['member'] + 'movie-id'}}" size=30 />
               <input aria-label="Chose date type" type="date" name="date" id="{{row['member'] + 'date-input-id'}}" size=30 />
@@ -95,6 +95,7 @@
 
   </body>
   <script>
+  function myhref(mid) { window.location.href = `/movies/${mid}`; }
     function createMovieModal(memberid) {
       console.log(memberid);
       const member = memberid.endsWith("-modal") ? memberid.replace("-modal", "") : memberid;

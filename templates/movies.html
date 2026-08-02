@@ -9,6 +9,17 @@
   </head>
   <body>
     <h1>Past Movies</h1>
+    {% for choice in choices %}
+    <div>
+      <img src="{{ choice.posterUrl }}" alt="{{ choice.title }}" class="thumbnail">
+      <span class="movie-title-modal">{{ choice.movieTitle }}</span>
+      <span class="choice-date-modal">{{ choice.date }}</span>
+      <img
+    </div>
+    {% endfor %}
+
 
   </body>
+  <script>
+  </script>
 </html>

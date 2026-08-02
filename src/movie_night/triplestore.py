@@ -106,6 +106,7 @@ def get_members(user_node: str):
     return [
         {
             "member": res["member"].value,
+            'mid': res["member"].value.replace("https://ontology.movie-night.site/data/_User_", ""),
             "name": res["name"].value,
             "date": res["lastDate"].value,
         }
@@ -174,9 +175,10 @@ def add_movie(user_node: str, family_member_node: str, movie_id: str, movie_name
     """ %(NamedNode(user_node), NamedNode(family_member_node), Literal(date, datatype=ns.xsd.date), movie_node )
     store.update(query)
 
-def find_movies(user_node: str, member_node: str):
+def find_movies(user_node: str , member_node: str | NamedNode ):
     """
     """
+    mem_node = member_node if isinstance(member_node, NamedNode) else NamedNode(member_node)
     query = """PREFIX mno:  <https://ontology.movie-night.site/>
     SELECT ?movie_title ?poster_url ?date
     FROM mno:MovieGraph
@@ -193,7 +195,7 @@ def find_movies(user_node: str, member_node: str):
             mno:poster ?poster_url ;
         .
     }
-    """ % (NamedNode(user_node), NamedNode(member_node))
+    """ % (NamedNode(user_node), mem_node)
 
     choices = [{"movieTitle": str(movie_title), "posterUrl": poster_url.value, "date": date.value } for movie_title, poster_url, date in store.query(query) ]
     return choices
