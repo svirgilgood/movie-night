@@ -62,11 +62,13 @@
     <h1 class="center">Home</h1>
     <div style="justify-content:center;align-items:center;display:grid; padding:10px;">
       {% for row in members %}
-      <div class="member-box" id="{{ row['mid'] }}" onclick="myhref(id)" id="{{ row['member'] }}" style="border:1px solid grey;padding:10px;border-radius:5%;">
-        <p>{{ row["name"] }}</p>
-        <p>{{ row["date"] }}</p>
+      <div class="member-box"  style="border:1px solid grey;padding:10px;border-radius:5%;">
+        <div class="member-name" id="{{ row['mid'] }}" onclick="myhref(id)" >
+          <p>{{ row["name"] }}</p>
+          <p>{{ row["date"] }}</p>
+        </div>
         <div class="member-box">
-          <div class="box-content" memberid="{{ row['member'] }}"  href="/movies/{{ row['member'] }}" >
+          <div class="box-content" memberid="{{ row['member'] }}" style="z-index:-1;"  >
             <!--  Last Movie Chosen (image?), date, new movie choice  -->
               <input aria-label="Movie IMDB Identity" list="{{ row['member'] + 'movie-id' + 'list'}}" onkeyup="autoComplete(id)" type="text" name="movie" id="{{ row['member'] + 'movie-id'}}" size=30 />
               <input aria-label="Chose date type" type="date" name="date" id="{{row['member'] + 'date-input-id'}}" size=30 />
