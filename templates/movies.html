@@ -4,19 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Past Movies</title>
-    <link href="css/style.css" rel="stylesheet">
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+    <style>
+      img {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        width: 150px;
+      }
+      .container {
+        display: grid;
+        grid-template-areas:
+          "image-column details-column";
+        grid-template-columns: 1fr 3fr;
+        gap: 3px;
+        background-color: grey;
+        padding: 3px;
+      }
+      .container div {
+        background-color: white;
+        padding: 10px;
+      }
+
+    </style>
     <!--- I think this is where I should add the movie choices, how to you add parameters to a jinja template? -->
   </head>
   <body>
-    <h1>Past Movies</h1>
-    {% for choice in choices %}
-    <div>
-      <img src="{{ choice.posterUrl }}" alt="{{ choice.title }}" class="thumbnail">
-      <span class="movie-title-modal">{{ choice.movieTitle }}</span>
-      <span class="choice-date-modal">{{ choice.date }}</span>
-      <img
+    <div style="justify-content:center;align-items:center;display:grid; padding:10px;">
+      <h1 style="justify-self:center;">Past Movies</h1>
+      {% for choice in choices %}
+      <div class="container">
+        <div class="image-column">
+          <a href="{{ choice.movieNode }}"><img src="{{ choice.posterUrl }}" alt="{{ choice.title }}" class="thumbnail"></a>
+        </div>
+        <div class="details-column">
+          <p class="movie-title">{{ choice.movieTitle }}</p>
+          <p class="choice-date">{{ choice.date }}</p>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
 
 
   </body>
