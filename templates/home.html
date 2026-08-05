@@ -12,46 +12,7 @@
         padding: 5px;
         width: 150px;
       }
-      /* The Modal (background) */
-      .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgb(0,0,0); /* Fallback color */
-        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-      }
-      .modal-content {
-        display: grid;
-        /* Work on grid style */
-        grid-template-areas:
-          "thumbnail"
-          "column";
-        position: relative;
-        background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
-        padding: 0px;
-        border: 1px solid #888;
-        width: 80%; /* Could be more or less, depending on screen size */
-      }
-      /* The Close Button */
-      .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-      }
 
-      .close:hover,
-      .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-      }
       .movie-choice {
         position: relative
       }
@@ -63,7 +24,7 @@
     <div style="justify-content:center;align-items:center;display:grid; padding:10px;">
       {% for row in members %}
       <div class="member-box"  style="border:1px solid grey;padding:10px;border-radius:5%;">
-        <div class="member-name" id="{{ row['mid'] }}" onclick="myhref(id)" >
+        <div class="member-name"id="{{ row['mid'] }}" onclick="myhref(id)" >
           <p>{{ row["name"] }}</p>
           <p>{{ row["date"] }}</p>
         </div>
@@ -97,46 +58,8 @@
 
   </body>
   <script>
-  function myhref(mid) { window.location.href = `/movies/${mid}`; }
-    function createMovieModal(memberid) {
-      console.log(memberid);
-      const member = memberid.endsWith("-modal") ? memberid.replace("-modal", "") : memberid;
-      const movieModal = document.getElementById(member + "-modal");
-      //console.log("memberid", memberid);
-      const modalContent = document.getElementById(member + "-modal-content");
-      // Add Header to modal with Users name
-      fetch("/movie-choices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({"member": member}),
-      }).then(response => response.json())
-        .then(r => {
-          for (const choice of r) {
-            const choiceDiv = document.createElement("div");
-            choiceDiv.setAttribute("class", "movie-choice");
-            const thumbnail = document.createElement("img");
-            thumbnail.setAttribute("src", choice.posterUrl);
-            thumbnail.setAttribute("alt", choice.movieTitle);
-            thumbnail.setAttribute("class", "thumbnail");
-            choiceDiv.appendChild(thumbnail);
-            const titleEle = document.createElement("span");
-            titleEle.innerHTML = choice.movieTitle;
-            titleEle.setAttribute("class", "movie-title-modal");
-            choiceDiv.appendChild(titleEle);
-            const dateEle  = document.createElement("span");
-            dateEle.innerHTML = choice.date;
-            dateEle.setAttribute("class", "choice-date-modal");
-            choiceDiv.appendChild(dateEle);
-            modalContent.appendChild(choiceDiv);
-          }
-          movieModal.style.display = "block";
-          window.onclick = function(event) {
-            if (event.target === movieModal) {
-              movieModal.display = "none";
-            }
-          }
-        })
-    }
+    function myhref(mid) { window.location.href = `/movies/${mid}`; }
+
     function addMovieChoice(name) {
       const movieImdbId = document.getElementById(name + "movie-id");
       const movieChoices = document.getElementById(name + "movie-idlist");
@@ -184,15 +107,7 @@
           }
         })
     }
-    function toggleActive(content) {
-      /*this.toggle("active");*/
-      console.log(content);
-      if (content.style.display === "block") {
-        content.style.display = "none";
-      } else {
-        content.style.display = "block";
-      }
-    }
+
     function addFamilyMember() {
       let name = document.getElementById("name-entry").value;
       console.log(name);
