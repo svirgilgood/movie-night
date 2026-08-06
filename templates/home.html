@@ -107,7 +107,15 @@
           }
         })
     }
-
+    function toggleActive(content) {
+      /*this.toggle("active");*/
+      console.log(content);
+      if (content.style.display === "block") {
+        content.style.display = "none";
+      } else {
+        content.style.display = "block";
+      }
+    }
     function addFamilyMember() {
       let name = document.getElementById("name-entry").value;
       console.log(name);
