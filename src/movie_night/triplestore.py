@@ -180,11 +180,12 @@ def find_movies(user_node: str , member_node: str | NamedNode ):
     """
     mem_node = member_node if isinstance(member_node, NamedNode) else NamedNode(member_node)
     query = """PREFIX mno:  <https://ontology.movie-night.site/>
-    SELECT ?movie_node ?movie_title ?poster_url ?date
+    SELECT ?movie_node ?movie_title ?poster_url ?date ?name
     FROM mno:MovieGraph
     FROM %s
     WHERE {
         %s
+            mno:fullName ?name ;
             mno:choice [
                 mno:onDate ?date ;
                 mno:selection ?movie_node ;
@@ -198,7 +199,13 @@ def find_movies(user_node: str , member_node: str | NamedNode ):
     ORDER BY DESC(?date)
     """ % (NamedNode(user_node), mem_node)
 
-    choices = [{"movieNode": movie_node.value, "movieTitle": movie_title.value, "posterUrl": poster_url.value, "date": date.value } for movie_node, movie_title, poster_url, date in store.query(query) ]
+    choices = [{
+        "name": name.value,
+        "movieNode": movie_node.value,
+        "movieTitle": movie_title.value,
+        "posterUrl": poster_url.value,
+        "date": date.value
+    } for movie_node, movie_title, poster_url, date, name in store.query(query) ]
     return choices
 
 

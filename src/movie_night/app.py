@@ -123,7 +123,11 @@ async def show_past_movies(request: Request, member_id: str, user=Depends(manage
     member_iri = ns.mno.term(f"data/_User_{member_id}")
     movie_choices = find_movies(user["user_node"], member_iri)
     print(movie_choices)
-    return templates.TemplateResponse(request, name="movies.html", context={"choices": movie_choices})
+    try:
+        name = movie_choices[0]["name"]
+        return templates.TemplateResponse(request, name="movies.html", context={"name": name, "choices": movie_choices})
+    except IndexError:
+        return RedirectResponse(url="/home")
 
 @app.get("/home")
 async def show_home(request: Request, user=Depends(manager)):
