@@ -181,7 +181,7 @@ def save_reset_password(newpassword: Annotated[str, Form()], confirmpassword: An
     user_node = ns.mno.term(f"data/_User_{userid}")
     if newpassword == confirmpassword:
         update_password(newpassword, user_node)
-        return RedirectResponse(url="login.html")
+        return RedirectResponse(url="/login")
     return templates.TemplateResponse(request, name="reset-password.html", context={"user_id": userid, "message": "Passwords Do not Match"})
 
 
