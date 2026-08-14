@@ -22,6 +22,7 @@ from .triplestore import (
     add_family_member,
     add_movie,
     find_movies,
+    check_user_password,
 )
 
 from .authenticator import (
@@ -34,6 +35,7 @@ from .authenticator import (
     Token,
     SECRET_KEY,
     verify_password,
+    update_password,
 )
 
 from .utils import auto_complete, ns
@@ -160,6 +162,27 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     manager.set_cookie(response, access_token)
     return response
     #return {"access_token": access_token}
+
+@app.get("/reset-password/{user_id}", response_class=HTMLResponse)
+def load_reset_password(user_id: str, request: Request):
+    user_node = ns.mno.term(f"data/_User_{user_id}")
+    user = check_user_password(user_node)
+    print("user", user)
+    if not user: #or user["disabled"] == "True":
+        #return templates.TemplateResponse(request, name="login.html")
+        return RedirectResponse(url="/login")
+
+    # If a user_id contains password return login screen
+    # else return reset password response
+    return templates.TemplateResponse(request, name="reset-password.html", context={"user_id": user_id})
+
+@app.post("/reset-password")
+def save_reset_password(newpassword: Annotated[str, Form()], confirmpassword: Annotated[str, Form()], userid: Annotated[str, Form()], request: Request):
+    user_node = ns.mno.term(f"data/_User_{userid}")
+    if newpassword == confirmpassword:
+        update_password(newpassword, user_node)
+        return RedirectResponse(url="login.html")
+    return templates.TemplateResponse(request, name="reset-password.html", context={"user_id": userid, "message": "Passwords Do not Match"})
 
 
 @app.post("/mdb")

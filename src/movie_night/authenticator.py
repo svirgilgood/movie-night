@@ -16,9 +16,9 @@ from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from pydantic import BaseModel
 
-from pyoxigraph import Store, Quad, Literal, QuerySolutions, BlankNode
+from pyoxigraph import Store, Quad, Literal, QuerySolutions, BlankNode, NamedNode
 
-from .triplestore import get_user
+from .triplestore import get_user, update_user_password
 from .utils import ns, create_node
 
 
@@ -84,6 +84,7 @@ def add_authentication(store: Store):
     store.add(Quad(user_node, ns.mno.userName, Literal(username), user_graph))
     store.add(Quad(user_node, ns.mno.fullName, Literal(full_name), user_graph))
     store.add(Quad(user_node, ns.mno.emailAddress, Literal(email), user_graph))
+    """
     store.add(
         Quad(
             user_node,
@@ -92,6 +93,7 @@ def add_authentication(store: Store):
             user_graph,
         )
     )
+    """
     store.add(Quad(user_node, ns.mno.disabled, Literal("False"), user_graph))
 
     """
@@ -112,6 +114,11 @@ def add_authentication(store: Store):
     store.add(Quad(movie_node, ns.dc.identifier, Literal("tt2908228"), movies_graph))
 
     store.flush()
+
+
+def update_password(new_password: str, user_node: NamedNode):
+    hashed = password_hash.hash(new_password)
+    update_user_password(user_node, hashed)
 
 
 def verify_password(plain_password, hashed_password):

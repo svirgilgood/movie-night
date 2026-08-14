@@ -8,6 +8,9 @@
     <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
   </head>
   <body class="center">
+    {% if message %}
+    <h1> {{ message }} </h1>
+    {% endif %}
     <form method="POST"  action="/login">
         <label for="username">Username:</label><br>
         <input type="text" id="username" name="username" value="johndoe"><br>

@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 from .utils import ns, create_node
 
+
 from typing import Dict
 
 load_dotenv()
@@ -49,15 +50,14 @@ def create_database():
 def get_user(username: str):
     query = """PREFIX mno:  <https://ontology.movie-night.site/>
 
-    SELECT ?userNode ?userName ?fullName ?email ?hashedPassword ?disabled
+    SELECT ?userNode ?userName ?email ?hashedPassword ?disabled
     FROM %s
     WHERE {
         ?userNode
             mno:userName ?userName ;
-            mno:fullName ?fullName ;
-            mno:emailAddress ?email ;
+            # mno:emailAddress ?email ;
             mno:hashedPassword ?hashedPassword ;
-            mno:disabled ?disabled ;
+            # mno:disabled ?disabled ;
         .
         VALUES ?userName { %s }
     }
@@ -72,16 +72,52 @@ def get_user(username: str):
         {
             "user_node": res["userNode"].value,
             "username": res["userName"].value,
-            "full_name": res["fullName"].value,
             "hashed_password": res["hashedPassword"].value,
-            "email": res["email"].value,
-            "disabled": res["disabled"].value,
+            #"email": res["email"].value,
+            #"disabled": res["disabled"].value,
         }
         for res in results
     ]
 
     if len(users) == 1:
         return users.pop()
+
+
+def update_user_password(user_node, hashed):
+    user_graph = ns.mno.term("UserGraph")
+    store.add(Quad(user_node, ns.mno.hashedPassword, Literal(hashed), user_graph))
+
+def check_user_password(user_node: NamedNode):
+    """
+    Check the if the user has a passwored, if not return the user node
+    """
+    query = """PREFIX mno:  <https://ontology.movie-night.site/>
+
+    SELECT ?userNode ?disabled
+    FROM %s
+    WHERE {
+        ?userNode
+            mno:disabled ?disabled ;
+        .
+        VALUES ?userNode { %s }
+        FILTER NOT EXISTS {
+            ?userNode
+                mno:hashedPassword ?hashedPassword ;
+            .
+        }
+    }
+    """ % (
+            ns.mno.term("UserGraph"),
+            user_node
+        )
+
+    print(query)
+
+    results = store.query(query)
+    users = [{ "user_node": res["userNode"].value, "disabled": res["disabled"].value} for res in results]
+    if len(users) == 1:
+        return users.pop()
+
 
 def get_members(user_node: str):
     query = """PREFIX mno:  <https://ontology.movie-night.site/>
@@ -198,6 +234,7 @@ def find_movies(user_node: str , member_node: str | NamedNode ):
     }
     ORDER BY DESC(?date)
     """ % (NamedNode(user_node), mem_node)
+
 
     choices = [{
         "name": name.value,
