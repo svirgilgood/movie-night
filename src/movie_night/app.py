@@ -29,7 +29,7 @@ from .authenticator import (
     User,
     authenticate_user,
     get_current_active_user,
-    add_authentication,
+    #add_authentication,
     create_access_token,
     EXPIRES,
     Token,
@@ -77,7 +77,8 @@ def query_user(user_id: str):
 @app.on_event("startup")
 def on_startup():
     store = create_database()
-    add_authentication(store)
+    # Fort testing puproses only
+    #add_authentication(store)
 
 @app.get("/", response_class=HTMLResponse)
 def serve_root(
@@ -87,8 +88,8 @@ def serve_root(
 
 @app.post("/update/")
 def process_update(update_data: UpdateData, user=Depends(manager)):
-    print(update_data)
-    print(user)
+    #print(update_data)
+    #print(user)
     match update_data.function:
         case "add_family_member":
             add_family_member(user["user_node"], update_data.data["name"])
@@ -109,9 +110,9 @@ def process_update(update_data: UpdateData, user=Depends(manager)):
 @app.post("/movie-choices")
 def movie_endpoint(movie_data: MovieData, user=Depends(manager)):
     """ """
-    print("movie_data", movie_data)
+    #print("movie_data", movie_data)
     res = find_movies(user["user_node"], movie_data.member)
-    print("movie lists", res)
+    #print("movie lists", res)
     return res
 
 
@@ -124,7 +125,7 @@ def auth_exception_handler(request: Request, exc: NotAuthenticatedException):
 async def show_past_movies(request: Request, member_id: str, user=Depends(manager)):
     member_iri = ns.mno.term(f"data/_User_{member_id}")
     movie_choices = find_movies(user["user_node"], member_iri)
-    print(movie_choices)
+    #print(movie_choices)
     try:
         name = movie_choices[0]["name"]
         return templates.TemplateResponse(request, name="movies.html", context={"name": name, "choices": movie_choices})
@@ -133,9 +134,9 @@ async def show_past_movies(request: Request, member_id: str, user=Depends(manage
 
 @app.get("/home")
 async def show_home(request: Request, user=Depends(manager)):
-    print(user)
+    #print(user)
     data = get_members(user["user_node"])
-    print(data)
+    #print(data)
     return templates.TemplateResponse(request, context={"members": data}, name="home.html")
 
 @app.get("/login", response_class=HTMLResponse)
@@ -147,10 +148,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     """
     #user = authenticate_user(form_data.username, form_data.password)
-    print("form-data", form_data)
+    #print("form-data", form_data)
 
     user = query_user(form_data.username)
-    print(user)
+    #print(user)
 
     if not user:
         raise InvalidCredentialsException
@@ -167,7 +168,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 def load_reset_password(user_id: str, request: Request):
     user_node = ns.mno.term(f"data/_User_{user_id}")
     user = check_user_password(user_node)
-    print("user", user)
+    #print("user", user)
     if not user: #or user["disabled"] == "True":
         #return templates.TemplateResponse(request, name="login.html")
         return RedirectResponse(url="/login")
@@ -179,9 +180,10 @@ def load_reset_password(user_id: str, request: Request):
 @app.post("/reset-password")
 def save_reset_password(newpassword: Annotated[str, Form()], confirmpassword: Annotated[str, Form()], userid: Annotated[str, Form()], request: Request):
     user_node = ns.mno.term(f"data/_User_{userid}")
+
     if newpassword == confirmpassword:
         update_password(newpassword, user_node)
-        return RedirectResponse(url="/login")
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(request, name="reset-password.html", context={"user_id": userid, "message": "Passwords Do not Match"})
 
 
