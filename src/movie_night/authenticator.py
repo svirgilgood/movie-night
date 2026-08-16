@@ -55,66 +55,67 @@ password_hash = PasswordHash.recommended()
 
 oath2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-def add_authentication(store: Store):
-    """
-    This is a script for creating user credentials from the .env file.
-    Updates the User to fit in the following schema:
-    ```
-    <user>
-        a mno:User ;
-        mno:userName "johndoe"^^xsd:string ;
-        mno:fullName "John Doe"^^xsd:string ;
-        mno:emailAddress "johndoe@example.com"^^xsd:string ;
-        mno:hashedPassword "$argon2id$v=19$m=65536,t=3,p=4$wagCPXjifgvUFBzq4hqe3w$CYaIb8sB+wtD+Vu/P4uod1+Qof8h+1g7bbDlBID48Rc"^^xsd:string ;
-        mno:disabled "False"^^xsd:string ;
-    .
-    ```
-    """
-    user_graph = ns.mno.term("UserGraph")
-    store.clear_graph(user_graph)
-    username = os.getenv("SYSTEM_USER_NAME")
-    full_name = os.getenv("SYSTEM_USER_FULLNAME")
-    email = os.getenv("SYSTEM_USER_EMAIL")
-    pswd = os.getenv("SYSTEM_USER_PASSWORD")
-
-    user_node = create_node(username)
-
-    store.add(Quad(user_node, ns.rdf.type, ns.mno.User, user_graph))
-    store.add(Quad(user_node, ns.mno.userName, Literal(username), user_graph))
-    store.add(Quad(user_node, ns.mno.fullName, Literal(full_name), user_graph))
-    store.add(Quad(user_node, ns.mno.emailAddress, Literal(email), user_graph))
-    """
-    store.add(
-        Quad(
-            user_node,
-            ns.mno.hashedPassword,
-            Literal(password_hash.hash(pswd)),
-            user_graph,
-        )
-    )
-    """
-    store.add(Quad(user_node, ns.mno.disabled, Literal("False"), user_graph))
-
-    """
-    Add the users default usage
-    """
-    store.add(Quad(user_node, ns.rdf.type, ns.mno.FamilyHead, user_node))
-    store.add(Quad(user_node, ns.rdf.type, ns.mno.FamilyMember, user_node))
-    store.add(Quad(user_node, ns.mno.fullName, Literal(full_name), user_node))
-
-    choice_node = BlankNode()
-    movies_graph = ns.mno.term("Movies")
-    movie_node = ns.mno.term("data/_Movie_tt2908228")
-    store.add(Quad(user_node, ns.mno.choice, choice_node, user_node))
-    store.add(Quad(choice_node, ns.mno.movie, movie_node, user_node))
-    store.add(Quad(choice_node, ns.mno.onDate, Literal("2023-03-13T10:23Z", datatype=ns.xsd.dateTime), user_node))
-
-    store.add(Quad(movie_node, ns.dc.term("title"), Literal("My Little Pony: Equestria Grils"), movies_graph))
-    store.add(Quad(movie_node, ns.dc.identifier, Literal("tt2908228"), movies_graph))
-
-    store.flush()
-
+# This authentication code was for testing
+# Removed to add to production
+# def add_authentication(store: Store):
+#     """
+#     This is a script for creating user credentials from the .env file.
+#     Updates the User to fit in the following schema:
+#     ```
+#     <user>
+#         a mno:User ;
+#         mno:userName "johndoe"^^xsd:string ;
+#         mno:fullName "John Doe"^^xsd:string ;
+#         mno:emailAddress "johndoe@example.com"^^xsd:string ;
+#         mno:hashedPassword "$argon2id$v=19$m=65536,t=3,p=4$wagCPXjifgvUFBzq4hqe3w$CYaIb8sB+wtD+Vu/P4uod1+Qof8h+1g7bbDlBID48Rc"^^xsd:string ;
+#         mno:disabled "False"^^xsd:string ;
+#     .
+#     ```
+#     """
+#     user_graph = ns.mno.term("UserGraph")
+#     store.clear_graph(user_graph)
+#     username = os.getenv("SYSTEM_USER_NAME")
+#     full_name = os.getenv("SYSTEM_USER_FULLNAME")
+#     email = os.getenv("SYSTEM_USER_EMAIL")
+#     pswd = os.getenv("SYSTEM_USER_PASSWORD")
+#
+#     user_node = create_node(username)
+#
+#     store.add(Quad(user_node, ns.rdf.type, ns.mno.User, user_graph))
+#     store.add(Quad(user_node, ns.mno.userName, Literal(username), user_graph))
+#     store.add(Quad(user_node, ns.mno.fullName, Literal(full_name), user_graph))
+#     store.add(Quad(user_node, ns.mno.emailAddress, Literal(email), user_graph))
+#     """
+#     store.add(
+#         Quad(
+#             user_node,
+#             ns.mno.hashedPassword,
+#             Literal(password_hash.hash(pswd)),
+#             user_graph,
+#         )
+#     )
+#     """
+#     store.add(Quad(user_node, ns.mno.disabled, Literal("False"), user_graph))
+#
+#     """
+#     Add the users default usage
+#     """
+#     store.add(Quad(user_node, ns.rdf.type, ns.mno.FamilyHead, user_node))
+#     store.add(Quad(user_node, ns.rdf.type, ns.mno.FamilyMember, user_node))
+#     store.add(Quad(user_node, ns.mno.fullName, Literal(full_name), user_node))
+#
+#     choice_node = BlankNode()
+#     movies_graph = ns.mno.term("Movies")
+#     movie_node = ns.mno.term("data/_Movie_tt2908228")
+#     store.add(Quad(user_node, ns.mno.choice, choice_node, user_node))
+#     store.add(Quad(choice_node, ns.mno.movie, movie_node, user_node))
+#     store.add(Quad(choice_node, ns.mno.onDate, Literal("2023-03-13T10:23Z", datatype=ns.xsd.dateTime), user_node))
+#
+#     store.add(Quad(movie_node, ns.dc.term("title"), Literal("My Little Pony: Equestria Grils"), movies_graph))
+#     store.add(Quad(movie_node, ns.dc.identifier, Literal("tt2908228"), movies_graph))
+#
+#     store.flush()
+#
 
 def update_password(new_password: str, user_node: NamedNode):
     hashed = password_hash.hash(new_password)
