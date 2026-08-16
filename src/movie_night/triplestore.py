@@ -40,7 +40,7 @@ def create_database():
     else:
         store = Store(DB)
         print("loading store from ttl")
-        with open("movie-night.trig", "r") as ttlp:
+        with open(DATA_DIR / "movie-night.trig", "r") as ttlp:
             store.bulk_load(ttlp, format=RdfFormat.TRIG)
         print("store loaded")
         store.optimize()
@@ -111,7 +111,7 @@ def check_user_password(user_node: NamedNode):
             user_node
         )
 
-    print(query)
+    #print(query)
 
     results = store.query(query)
     users = [{ "user_node": res["userNode"].value, "disabled": res["disabled"].value} for res in results]
