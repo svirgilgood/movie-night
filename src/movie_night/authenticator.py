@@ -4,11 +4,10 @@ from datetime import timedelta, datetime, timezone
 from dotenv import load_dotenv, dotenv_values
 from fastapi.security import (
     OAuth2PasswordBearer,
-    OAuth2PasswordRequestForm,
     HTTPBasic,
     HTTPBasicCredentials,
 )
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, HTTPException, status
 import os
 import jwt
 from jwt.exceptions import InvalidTokenError
@@ -16,10 +15,9 @@ from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from pydantic import BaseModel
 
-from pyoxigraph import Store, Quad, Literal, QuerySolutions, BlankNode, NamedNode
+from pyoxigraph import NamedNode
 
 from .triplestore import get_user, update_user_password
-from .utils import ns, create_node
 
 
 load_dotenv()
@@ -116,6 +114,7 @@ oath2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 #
 #     store.flush()
 #
+
 
 def update_password(new_password: str, user_node: NamedNode):
     hashed = password_hash.hash(new_password)

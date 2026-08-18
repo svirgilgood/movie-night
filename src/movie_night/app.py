@@ -1,18 +1,16 @@
-from fastapi import FastAPI, Request, Depends, HTTPException, status, File, UploadFile, Form
-from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
+from typing import Annotated, Dict
+from fastapi import FastAPI, Request, Depends, status, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.security import HTTPBasic
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from datetime import datetime, timedelta, timezone
 
 from fastapi_login import LoginManager
 
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
-    HTTPBasicCredentials,
 )
 from fastapi_login.exceptions import InvalidCredentialsException
 from .triplestore import (
@@ -26,13 +24,13 @@ from .triplestore import (
 )
 
 from .authenticator import (
-    User,
-    authenticate_user,
-    get_current_active_user,
-    #add_authentication,
-    create_access_token,
-    EXPIRES,
-    Token,
+    # User,
+    # authenticate_user,
+    # get_current_active_user,
+    # add_authentication,
+    # create_access_token,
+    # EXPIRES,
+    # Token,
     SECRET_KEY,
     verify_password,
     update_password,
@@ -40,10 +38,10 @@ from .authenticator import (
 
 from .utils import auto_complete, ns
 
+
 class NotAuthenticatedException(Exception):
     pass
 
-from typing import Annotated, Dict
 
 app = FastAPI()
 
@@ -53,20 +51,26 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="./templates")
 
-manager = LoginManager(SECRET_KEY, "/login", use_cookie=True, not_authenticated_exception=NotAuthenticatedException)
+manager = LoginManager(SECRET_KEY, "/login", use_cookie=True,
+                       not_authenticated_exception=NotAuthenticatedException)
+
 
 class MemberData(BaseModel):
     username: str
+
 
 class UpdateData(BaseModel):
     function: str
     data: Dict
 
+
 class MovieRequest(BaseModel):
     title: str
 
+
 class MovieData(BaseModel):
     member: str
+
 
 @manager.user_loader()
 def query_user(user_id: str):
@@ -76,20 +80,24 @@ def query_user(user_id: str):
 
 @app.on_event("startup")
 def on_startup():
-    store = create_database()
+    _ = create_database()
+    # store = create_database()
     # Fort testing puproses only
-    #add_authentication(store)
+    # add_authentication(store)
+
 
 @app.get("/", response_class=HTMLResponse)
 def serve_root(
         request: Request
 ):
-    return templates.TemplateResponse(request=request, name="index.html") #context={"data:data"})
+    # context={"data:data"})
+    return templates.TemplateResponse(request=request, name="index.html")
+
 
 @app.post("/update/")
 def process_update(update_data: UpdateData, user=Depends(manager)):
-    #print(update_data)
-    #print(user)
+    # print(update_data)
+    # print(user)
     match update_data.function:
         case "add_family_member":
             add_family_member(user["user_node"], update_data.data["name"])
@@ -110,9 +118,9 @@ def process_update(update_data: UpdateData, user=Depends(manager)):
 @app.post("/movie-choices")
 def movie_endpoint(movie_data: MovieData, user=Depends(manager)):
     """ """
-    #print("movie_data", movie_data)
+    # print("movie_data", movie_data)
     res = find_movies(user["user_node"], movie_data.member)
-    #print("movie lists", res)
+    # print("movie lists", res)
     return res
 
 
@@ -122,74 +130,101 @@ def auth_exception_handler(request: Request, exc: NotAuthenticatedException):
 
 
 @app.get("/movies/{member_id}")
-async def show_past_movies(request: Request, member_id: str, user=Depends(manager)):
+async def show_past_movies(
+        request: Request,
+        member_id: str,
+        user=Depends(manager)
+):
     member_iri = ns.mno.term(f"data/_User_{member_id}")
     movie_choices = find_movies(user["user_node"], member_iri)
-    #print(movie_choices)
+    # print(movie_choices)
     try:
         name = movie_choices[0]["name"]
-        return templates.TemplateResponse(request, name="movies.html", context={"name": name, "choices": movie_choices})
+        return templates.TemplateResponse(
+            request, name="movies.html",
+            context={"name": name, "choices": movie_choices}
+        )
     except IndexError:
         return RedirectResponse(url="/home")
 
+
 @app.get("/home")
 async def show_home(request: Request, user=Depends(manager)):
-    #print(user)
+    # print(user)
     data = get_members(user["user_node"])
-    #print(data)
-    return templates.TemplateResponse(request, context={"members": data}, name="home.html")
+    # print(data)
+    return templates.TemplateResponse(
+        request, context={"members": data}, name="home.html"
+    )
+
 
 @app.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
     return templates.TemplateResponse(request, name="login.html")
 
+
 @app.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     """
-    #user = authenticate_user(form_data.username, form_data.password)
-    #print("form-data", form_data)
+    # user = authenticate_user(form_data.username, form_data.password)
+    # print("form-data", form_data)
 
     user = query_user(form_data.username)
-    #print(user)
+    # print(user)
 
     if not user:
         raise InvalidCredentialsException
     if not verify_password(form_data.password, user["hashed_password"]):
         raise InvalidCredentialsException
-    access_token = manager.create_access_token(data={"sub": form_data.username})
+    access_token = manager.create_access_token(
+        data={"sub": form_data.username})
 
-    response = RedirectResponse(url="/home",status_code=status.HTTP_302_FOUND)
+    response = RedirectResponse(url="/home", status_code=status.HTTP_302_FOUND)
     manager.set_cookie(response, access_token)
     return response
-    #return {"access_token": access_token}
+    # return {"access_token": access_token}
+
 
 @app.get("/reset-password/{user_id}", response_class=HTMLResponse)
 def load_reset_password(user_id: str, request: Request):
     user_node = ns.mno.term(f"data/_User_{user_id}")
     user = check_user_password(user_node)
-    #print("user", user)
-    if not user: #or user["disabled"] == "True":
-        #return templates.TemplateResponse(request, name="login.html")
+    # print("user", user)
+    if not user:  # or user["disabled"] == "True":
+        # return templates.TemplateResponse(request, name="login.html")
         return RedirectResponse(url="/login")
 
     # If a user_id contains password return login screen
     # else return reset password response
-    return templates.TemplateResponse(request, name="reset-password.html", context={"user_id": user_id})
+    return templates.TemplateResponse(
+        request, name="reset-password.html", context={"user_id": user_id}
+    )
+
 
 @app.post("/reset-password")
-def save_reset_password(newpassword: Annotated[str, Form()], confirmpassword: Annotated[str, Form()], userid: Annotated[str, Form()], request: Request):
+def save_reset_password(
+        newpassword: Annotated[str, Form()],
+        confirmpassword: Annotated[str, Form()],
+        userid: Annotated[str, Form()],
+        request: Request
+):
     user_node = ns.mno.term(f"data/_User_{userid}")
 
     if newpassword == confirmpassword:
         update_password(newpassword, user_node)
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    return templates.TemplateResponse(request, name="reset-password.html", context={"user_id": userid, "message": "Passwords Do not Match"})
+        return RedirectResponse(
+            url="/login", status_code=status.HTTP_303_SEE_OTHER
+        )
+    return templates.TemplateResponse(
+        request,
+        name="reset-password.html",
+        context={"user_id": userid, "message": "Passwords Do not Match"}
+    )
 
 
 @app.post("/mdb")
 async def search_mdb(request: MovieRequest, user=Depends(manager)):
     response = await auto_complete(request.title)
-    #print(response)
+    # print(response)
     return response
-

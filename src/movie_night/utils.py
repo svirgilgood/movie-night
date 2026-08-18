@@ -13,6 +13,7 @@ load_dotenv()
 
 API_KEY = os.getenv("OMDBAPI_KEY")
 
+
 class Namespace(str):
     def __new__(cls, value: str):
         return str.__new__(cls, value)
@@ -36,6 +37,7 @@ class NS:
     def __getattr__(self, namespace):
         return self.get(namespace)
 
+
 PREFIXES = {
     "mno": "https://ontology.movie-night.site/",
     "dc": "http://purl.org/dc/elements/1.1/",
@@ -51,18 +53,17 @@ ns = NS(PREFIXES)
 
 async def auto_complete(partial_name: str):
     """
-    query the OIMdb API to bring back a list of names that can be used for auto complete
-    This needs to be made async
+    query the OIMdb API to bring back a list of names that can be used for auto
+    complete This needs to be made async
     """
-    #print(partial_name)
+    # print(partial_name)
     params = {"apikey": API_KEY, "s": partial_name}
     async with aiohttp.ClientSession() as session:
         async with session.get("http://www.omdbapi.com/",  params=params) as response:
             j = await response.json()
             return j
-    #r = requests.get("http://www.omdbapi.com/", params=params)
-    #return r.json()
-
+    # r = requests.get("http://www.omdbapi.com/", params=params)
+    # return r.json()
 
 
 def create_node(name: str, data_class="User") -> NamedNode:
